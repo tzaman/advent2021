@@ -37,23 +37,8 @@ fn read_input(filename: &str) -> Vec<u32> {
         .collect()
 }
 
-fn count_increases(depths: Vec<u32>) -> u32 {
-    let mut prev: Option<u32> = None;
-    let mut increasing = 0;
-
-    for depth in depths {
-        if let Some(p) = prev {
-            if depth > p {
-                increasing += 1;
-            }
-        }
-        prev = Some(depth);
-    }
-    increasing
-}
-
-fn count_increases_windowed(depths: Vec<u32>) -> u32 {
-    let mut window = Window::<3>::new();
+fn windowed_sweep<const SIZE: usize>(depths: Vec<u32>) -> u32 {
+    let mut window = Window::<SIZE>::new();
     depths
         .iter()
         .map(|&depth| window.push_and_check(depth))
@@ -61,9 +46,12 @@ fn count_increases_windowed(depths: Vec<u32>) -> u32 {
 }
 
 fn main() {
-    let inc = count_increases(read_input(INPUT));
-    println!("Depth increases: {}", inc);
-
-    let inc = count_increases_windowed(read_input(INPUT));
-    println!("Windowed increases: {}", inc);
+    println!(
+        "Depth increases: {}",
+        windowed_sweep::<1>(read_input(INPUT))
+    );
+    println!(
+        "Windowed increases: {}",
+        windowed_sweep::<3>(read_input(INPUT))
+    );
 }
