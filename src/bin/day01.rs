@@ -16,13 +16,12 @@ impl<const SIZE: usize> Window<SIZE> {
     }
 
     fn push_and_check(&mut self, value: u32) -> u32 {
-        if self.values.len() < SIZE {
-            self.values.push_back(value);
+        let prev_sum: u32 = self.values.iter().sum();
+        self.values.push_back(value);
+        if self.values.len() <= SIZE {
             return 0;
         }
-        let prev_sum: u32 = self.values.iter().sum();
         self.values.pop_front();
-        self.values.push_back(value);
         let new_sum: u32 = self.values.iter().sum();
         (new_sum > prev_sum) as u32
     }
