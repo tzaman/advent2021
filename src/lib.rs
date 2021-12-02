@@ -10,6 +10,6 @@ pub fn iter_lines(filename: &str) -> impl Iterator<Item = String> {
 #[macro_export]
 macro_rules! get_my_lines {
     () => {
-        iter_lines(&file!().replace("bin", "input").replace(".rs", "/input.txt"))
+        iter_lines(&file!().replace("bin", "input").replace(".rs", ".txt"))
     };
 }
