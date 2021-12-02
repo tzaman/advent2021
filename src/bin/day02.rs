@@ -29,7 +29,7 @@ impl Position {
         };
     }
 
-    fn update_better(&mut self, dir: &Direction) {
+    fn update_aimed(&mut self, dir: &Direction) {
         match dir {
             Direction::Forward(units) => {
                 self.x += units;
@@ -66,7 +66,7 @@ fn follow_directions() -> u32 {
 
 fn follow_directions_better() -> u32 {
     let mut pos = Position::new();
-    get_my_lines!().for_each(|line| pos.update_better(&line.parse::<Direction>().unwrap()));
+    get_my_lines!().for_each(|line| pos.update_aimed(&line.parse::<Direction>().unwrap()));
     pos.x * pos.y
 }
 
