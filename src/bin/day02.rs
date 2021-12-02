@@ -1,4 +1,4 @@
-use advent::{get_my_lines, iter_lines};
+use advent::{get_my_lines, iter_lines, InputError};
 use regex::Regex;
 use std::str::FromStr;
 
@@ -14,21 +14,6 @@ enum Direction {
     Forward(u32),
     Up(u32),
     Down(u32),
-}
-
-#[derive(Debug, Clone)]
-struct AdventError;
-
-impl From<regex::Error> for AdventError {
-    fn from(_: regex::Error) -> AdventError {
-        AdventError
-    }
-}
-
-impl From<std::num::ParseIntError> for AdventError {
-    fn from(_: std::num::ParseIntError) -> AdventError {
-        AdventError
-    }
 }
 
 impl Position {
@@ -57,18 +42,18 @@ impl Position {
 }
 
 impl FromStr for Direction {
-    type Err = AdventError;
+    type Err = InputError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let re = Regex::new(r"(forward|up|down) (\d+)")?;
-        let cap = re.captures(s).ok_or(AdventError)?;
-        let direction = cap.get(1).ok_or(AdventError)?.as_str();
-        let units = cap.get(2).ok_or(AdventError)?.as_str().parse::<u32>()?;
+        let cap = re.captures(s).ok_or(InputError)?;
+        let direction = cap.get(1).ok_or(InputError)?.as_str();
+        let units = cap.get(2).ok_or(InputError)?.as_str().parse::<u32>()?;
         match direction {
             "forward" => Ok(Self::Forward(units)),
             "up" => Ok(Self::Up(units)),
             "down" => Ok(Self::Down(units)),
-            _ => Err(AdventError),
+            _ => Err(InputError),
         }
     }
 }

@@ -13,3 +13,18 @@ macro_rules! get_my_lines {
         iter_lines(&file!().replace("bin", "input").replace(".rs", ".txt"))
     };
 }
+
+#[derive(Debug, Clone)]
+pub struct InputError;
+
+impl From<regex::Error> for InputError {
+    fn from(_: regex::Error) -> InputError {
+        InputError
+    }
+}
+
+impl From<std::num::ParseIntError> for InputError {
+    fn from(_: std::num::ParseIntError) -> InputError {
+        InputError
+    }
+}
