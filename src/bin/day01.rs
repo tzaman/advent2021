@@ -1,8 +1,5 @@
+use advent::{get_my_lines, iter_lines};
 use std::collections::VecDeque;
-use std::fs::File;
-use std::io::{BufRead, BufReader};
-
-const INPUT: &str = "src/input/day01/input.txt";
 
 struct Window<const SIZE: usize> {
     values: VecDeque<u32>,
@@ -27,12 +24,9 @@ impl<const SIZE: usize> Window<SIZE> {
     }
 }
 
-fn read_input(filename: &str) -> Vec<u32> {
-    let file = File::open(filename).expect("File not found!");
-    let reader = BufReader::new(file);
-    reader
-        .lines()
-        .map(|line| line.unwrap().parse::<u32>().unwrap())
+fn parse_input() -> Vec<u32> {
+    get_my_lines!()
+        .map(|line| line.parse::<u32>().unwrap())
         .collect()
 }
 
@@ -45,12 +39,6 @@ fn windowed_sweep<const SIZE: usize>(depths: Vec<u32>) -> u32 {
 }
 
 fn main() {
-    println!(
-        "Depth increases: {}",
-        windowed_sweep::<1>(read_input(INPUT))
-    );
-    println!(
-        "Windowed increases: {}",
-        windowed_sweep::<3>(read_input(INPUT))
-    );
+    println!("Depth increases: {}", windowed_sweep::<1>(parse_input()));
+    println!("Windowed increases: {}", windowed_sweep::<3>(parse_input()));
 }
