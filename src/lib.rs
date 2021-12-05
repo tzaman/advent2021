@@ -1,7 +1,7 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader};
 use std::error::Error;
 use std::fmt;
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 
 pub fn iter_lines(filename: &str) -> impl Iterator<Item = String> {
     let file = File::open(filename).expect("File not found!");
@@ -25,9 +25,7 @@ impl fmt::Display for InputError {
     }
 }
 
-impl Error for InputError {
-
-}
+impl Error for InputError {}
 
 impl From<regex::Error> for InputError {
     fn from(_: regex::Error) -> InputError {
