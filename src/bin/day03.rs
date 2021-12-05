@@ -45,16 +45,22 @@ impl FreqCounter {
     }
 }
 
-fn solve() -> Result<()> {
+fn solve_p1() -> Result<usize> {
     let mut f = FreqCounter::new(12);
     get_my_lines!().try_for_each(|line| f.update(&line))?;
-    println!("gamma * epsilon: {}", f.gamma()? * f.epsilon()?);
+    Ok(f.gamma()? * f.epsilon()?)
+}
+
+fn solve_p2() -> Result<()> {
     Ok(())
 }
 
 fn main() {
-    println!("Hello day3");
-    match solve() {
+    match solve_p1() {
+        Ok(result) => println!("gamma * epsilon: {}", result),
+        Err(e) => println!("Something went wrong: {}", e),
+    };
+    match solve_p2() {
         Ok(()) => println!("Success!"),
         Err(e) => println!("Something went wrong: {}", e),
     };
