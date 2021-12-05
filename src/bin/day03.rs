@@ -1,5 +1,5 @@
 use advent::{get_my_lines, iter_lines};
-use anyhow::{Result, bail};
+use anyhow::{bail, Context, Result};
 use counter::Counter;
 
 #[derive(Debug)]
@@ -20,19 +20,37 @@ impl FreqCounter {
         if self.size != line.len() {
             bail!("Counter size must match line length!")
         }
-        assert_eq!(self.size, line.len());
-        line.chars().enumerate().for_each(|(i, ch)|
-            self.freq[i][&ch] += 1
-        );
+        line.chars()
+            .enumerate()
+            .for_each(|(i, ch)| self.freq[i][&ch] += 1);
         Ok(())
+    }
+
+    fn gamma(&self) -> Result<usize> {
+        let common_bits = self
+            .freq
+            .iter()
+            .map(|counter| counter.most_common_ordered()[0].0)
+            .collect::<String>();
+        usize::from_str_radix(&common_bits, 2).context("Failed to parse binary string!")
+    }
+
+    fn epsilon(&self) -> Result<usize> {
+        let common_bits = self
+            .freq
+            .iter()
+            .map(|counter| counter.most_common_ordered().last().unwrap().0)
+            .collect::<String>();
+        usize::from_str_radix(&common_bits, 2).context("Failed to parse binary string!")
     }
 }
 
 fn solve() -> Result<()> {
-    let mut f = FreqCounter::new(122);
-    get_my_lines!().try_for_each(|line| f.update(&line))
+    let mut f = FreqCounter::new(12);
+    get_my_lines!().try_for_each(|line| f.update(&line))?;
+    println!("gamma * epsilon: {}", f.gamma()? * f.epsilon()?);
+    Ok(())
 }
-
 
 fn main() {
     println!("Hello day3");
