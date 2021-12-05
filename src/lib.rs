@@ -1,5 +1,7 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::error::Error;
+use std::fmt;
 
 pub fn iter_lines(filename: &str) -> impl Iterator<Item = String> {
     let file = File::open(filename).expect("File not found!");
@@ -16,6 +18,16 @@ macro_rules! get_my_lines {
 
 #[derive(Debug, Clone)]
 pub struct InputError;
+
+impl fmt::Display for InputError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Failed to parse input!")
+    }
+}
+
+impl Error for InputError {
+
+}
 
 impl From<regex::Error> for InputError {
     fn from(_: regex::Error) -> InputError {
