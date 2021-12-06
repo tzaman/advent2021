@@ -83,7 +83,7 @@ fn parse_numbers(it: &mut impl Iterator<Item = String>) -> Result<Vec<u8>> {
         .context("Failed to parse bingo numbers!")
 }
 
-fn solve_p1() -> Result<usize> {
+fn parse_input() -> Result<(Vec<u8>, Vec<Bingo>)> {
     let mut lines = get_my_lines!();
     let mut boards: Vec<Bingo> = Vec::new();
     let numbers = parse_numbers(&mut lines)?;
@@ -94,6 +94,11 @@ fn solve_p1() -> Result<usize> {
             None => break,
         }
     }
+    Ok((numbers, boards))
+}
+
+fn solve_p1() -> Result<usize> {
+    let (numbers, mut boards) = parse_input()?;
     for num in numbers {
         for board in boards.iter_mut() {
             if let Some(value) = board.mark(num) {
