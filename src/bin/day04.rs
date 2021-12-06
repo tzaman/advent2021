@@ -109,7 +109,24 @@ fn solve_p1() -> Result<usize> {
     bail!("No winning board found!")
 }
 
+fn solve_p2() -> Result<usize> {
+    let (numbers, mut boards) = parse_input()?;
+    for num in numbers {
+        let count = boards.len();
+        for board in boards.iter_mut() {
+            if let Some(value) = board.mark(num) {
+                if count == 1 {
+                    return Ok(value * num as usize);
+                }
+            }
+        }
+        boards.retain(|board| board.check() == None);
+    }
+    bail!("No unique last-winning board found!")
+}
+
 fn main() -> Result<()> {
-    println!("Winning board value: {}", solve_p1()?);
+    println!("First winning board value: {}", solve_p1()?);
+    println!("Last winning board value: {}", solve_p2()?);
     Ok(())
 }
