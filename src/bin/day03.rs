@@ -57,10 +57,7 @@ fn filter_by_bit(vec: &Vec<String>, cond: fn(&Vec<String>, usize) -> Result<u8>)
     let mut vec = vec.clone();
     for bit in 0..vec.len() {
         let criterion = cond(&vec, bit)?;
-        vec = vec
-            .into_iter()
-            .filter(|line| line.as_bytes()[bit] == criterion)
-            .collect();
+        vec.retain(|item| item.as_bytes()[bit] == criterion);
         if vec.len() == 1 {
             return Ok(vec.first().unwrap().to_owned());
         }
