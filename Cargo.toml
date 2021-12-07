@@ -8,5 +8,6 @@ edition = "2021"
 [dependencies]
 anyhow = "1"
 counter = "0.5"
+itertools = "0.10"
 regex = "1"
 thiserror = "1"
