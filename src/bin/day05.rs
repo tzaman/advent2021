@@ -13,7 +13,7 @@ struct Vent {
 
 fn parse_tuple(s: &str) -> Result<(u32, u32)> {
     let (x, y) = s
-        .split(",")
+        .split(',')
         .map(|i| i.parse::<u32>())
         .next_tuple()
         .with_context(|| format!("Failed to split '{}' on comma", s))?;

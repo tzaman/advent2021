@@ -12,7 +12,7 @@ impl Bingo {
     fn new(it: &mut impl Iterator<Item = String>) -> Result<Option<Self>> {
         let mut b = Self::default();
         match it.next() {
-            Some(s) => ensure!(s == "", format!("Expected blank line, found: '{}'!", s)),
+            Some(s) => ensure!(s.is_empty(), format!("Expected blank line, found: '{}'!", s)),
             None => return Ok(None),
         }
         for i in 0..5 {
@@ -24,10 +24,7 @@ impl Bingo {
                 .map(|i| i.parse::<u8>())
                 .collect::<Result<Vec<u8>, ParseIntError>>()
                 .with_context(|| format!("Failed to parse board at line: '{}'!", line))?;
-
-            for j in 0..5 {
-                b.board[i][j] = nums[j];
-            }
+            b.board[i][..].clone_from_slice(&nums[..]);
         }
         Ok(Some(b))
     }
@@ -77,7 +74,7 @@ impl Bingo {
 fn parse_numbers(it: &mut impl Iterator<Item = String>) -> Result<Vec<u8>> {
     it.next()
         .ok_or(anyhow!("Bingo numbers not found!"))?
-        .split(",")
+        .split(',')
         .map(|i| i.parse::<u8>())
         .collect::<Result<Vec<u8>, ParseIntError>>()
         .context("Failed to parse bingo numbers!")

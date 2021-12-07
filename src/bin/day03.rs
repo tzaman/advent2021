@@ -2,16 +2,16 @@ use advent::{get_my_lines, iter_lines};
 use anyhow::{anyhow, bail, Context, Result};
 use counter::Counter;
 
-fn freq_at(report: &Vec<String>, pos: usize) -> Result<Counter<u8>> {
+fn freq_at(report: &[String], pos: usize) -> Result<Counter<u8>> {
     let f: Option<Vec<&u8>> = report.iter().map(|s| s.as_bytes().get(pos)).collect();
     let mut counter: Counter<u8> = Counter::new();
     f.with_context(|| format!("Out of bounds counting bit at position: {}", pos))?
         .iter()
-        .for_each(|ch| counter[&ch] += 1);
+        .for_each(|ch| counter[ch] += 1);
     Ok(counter)
 }
 
-fn mcb_at(report: &Vec<String>, pos: usize) -> Result<u8> {
+fn mcb_at(report: &[String], pos: usize) -> Result<u8> {
     let counter = freq_at(report, pos)?;
     if counter[&b'1'] >= counter[&b'0'] {
         Ok(b'1')
@@ -20,7 +20,7 @@ fn mcb_at(report: &Vec<String>, pos: usize) -> Result<u8> {
     }
 }
 
-fn lcb_at(report: &Vec<String>, pos: usize) -> Result<u8> {
+fn lcb_at(report: &[String], pos: usize) -> Result<u8> {
     let counter = freq_at(report, pos)?;
     if counter[&b'0'] <= counter[&b'1'] {
         Ok(b'0')
@@ -33,16 +33,16 @@ fn binary_to_int(s: &str) -> Result<usize> {
     usize::from_str_radix(s, 2).context("Failed to parse binary string!")
 }
 
-fn collect_bits(vec: &Vec<String>, cond: fn(&Vec<String>, usize) -> Result<u8>) -> Result<String> {
+fn collect_bits(vec: &[String], cond: fn(&[String], usize) -> Result<u8>) -> Result<String> {
     let len = vec.first().ok_or(anyhow!("No elements in vector!"))?.len();
     let bits: Vec<u8> = (0..len)
-        .map(|i| cond(&vec, i))
+        .map(|i| cond(vec, i))
         .collect::<Result<Vec<u8>>>()?;
     Ok(String::from_utf8(bits)?)
 }
 
-fn filter_by_bit(vec: &Vec<String>, cond: fn(&Vec<String>, usize) -> Result<u8>) -> Result<String> {
-    let mut vec = vec.clone();
+fn filter_by_bit(vec: &[String], cond: fn(&[String], usize) -> Result<u8>) -> Result<String> {
+    let mut vec = vec.to_owned();
     for bit in 0..vec.len() {
         let criterion = cond(&vec, bit)?;
         vec.retain(|item| item.as_bytes()[bit] == criterion);
