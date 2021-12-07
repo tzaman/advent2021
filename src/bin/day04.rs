@@ -12,7 +12,10 @@ impl Bingo {
     fn new(it: &mut impl Iterator<Item = String>) -> Result<Option<Self>> {
         let mut b = Self::default();
         match it.next() {
-            Some(s) => ensure!(s.is_empty(), format!("Expected blank line, found: '{}'!", s)),
+            Some(s) => ensure!(
+                s.is_empty(),
+                format!("Expected blank line, found: '{}'!", s)
+            ),
             None => return Ok(None),
         }
         for i in 0..5 {

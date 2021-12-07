@@ -2,22 +2,32 @@ use advent::{get_my_lines, iter_lines};
 use anyhow::{anyhow, Context, Error, Result};
 use counter::Counter;
 use itertools::Itertools;
-use std::cmp::{max, min};
+use std::cmp::Ordering;
 use std::str::FromStr;
 
 #[derive(Clone, Debug, Default)]
 struct Vent {
-    start: (u32, u32),
-    end: (u32, u32),
+    start: (i32, i32),
+    end: (i32, i32),
+    x_step: i32,
+    y_step: i32,
 }
 
-fn parse_tuple(s: &str) -> Result<(u32, u32)> {
+fn parse_tuple(s: &str) -> Result<(i32, i32)> {
     let (x, y) = s
         .split(',')
-        .map(|i| i.parse::<u32>())
+        .map(|i| i.parse::<i32>())
         .next_tuple()
         .with_context(|| format!("Failed to split '{}' on comma", s))?;
     Ok((x?, y?))
+}
+
+fn step(i: i32, j: i32) -> i32 {
+    match i.cmp(&j) {
+        Ordering::Less => 1,
+        Ordering::Equal => 0,
+        Ordering::Greater => -1,
+    }
 }
 
 impl FromStr for Vent {
@@ -27,10 +37,28 @@ impl FromStr for Vent {
             .split(" -> ")
             .next_tuple()
             .ok_or_else(|| anyhow!("Failed to split '{}' on ->", s))?;
+        let (start, end) = (parse_tuple(first)?, parse_tuple(second)?);
         Ok(Vent {
-            start: parse_tuple(first)?,
-            end: parse_tuple(second)?,
+            start,
+            end,
+            x_step: step(start.0, end.0),
+            y_step: step(start.1, end.1),
         })
+    }
+}
+
+impl Iterator for Vent {
+    type Item = (i32, i32);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.start.0 == self.end.0 + self.x_step && self.start.1 == self.end.1 + self.y_step {
+            None
+        } else {
+            let pos = (self.start.0, self.start.1);
+            self.start.0 += self.x_step;
+            self.start.1 += self.y_step;
+            Some(pos)
+        }
     }
 }
 
@@ -42,22 +70,23 @@ fn parse_input() -> Result<Vec<Vent>> {
 
 fn solve_p1() -> Result<usize> {
     let vents = parse_input()?;
-    // dbg!(&vents);
-    let mut sparse_map: Counter<(u32, u32)> = Counter::new();
+    let mut sparse_map: Counter<(i32, i32)> = Counter::new();
     for vent in vents {
-        if vent.start.0 == vent.end.0 {
-            let low = min(vent.start.1, vent.end.1);
-            let high = max(vent.start.1, vent.end.1) + 1;
-            for j in low..high {
-                sparse_map[&(vent.start.0, j)] += 1;
+        if vent.start.0 == vent.end.0 || vent.start.1 == vent.end.1 {
+            for pos in vent {
+                sparse_map[&pos] += 1;
             }
         }
-        if vent.start.1 == vent.end.1 {
-            let low = min(vent.start.0, vent.end.0);
-            let high = max(vent.start.0, vent.end.0) + 1;
-            for i in low..high {
-                sparse_map[&(i, vent.start.1)] += 1;
-            }
+    }
+    Ok(sparse_map.values().filter(|&v| *v > 1).count())
+}
+
+fn solve_p2() -> Result<usize> {
+    let vents = parse_input()?;
+    let mut sparse_map: Counter<(i32, i32)> = Counter::new();
+    for vent in vents {
+        for pos in vent {
+            sparse_map[&pos] += 1;
         }
     }
     Ok(sparse_map.values().filter(|&v| *v > 1).count())
@@ -65,5 +94,6 @@ fn solve_p1() -> Result<usize> {
 
 fn main() -> Result<()> {
     println!("Dangerous vents: {}", solve_p1()?);
+    println!("Dangerous vents (diagonal): {}", solve_p2()?);
     Ok(())
 }
