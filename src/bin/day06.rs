@@ -1,19 +1,14 @@
-use advent::{get_my_lines, iter_lines};
-use anyhow::{Context, Result};
+use advent::{get_my_values, iter_csv_line};
+use anyhow::Result;
 
 const MAX_AGE: usize = 9;
 const RESET_AGE: usize = 7;
 
 fn parse_input() -> Result<[usize; MAX_AGE]> {
     let mut fish: [usize; MAX_AGE] = [0; MAX_AGE];
-    get_my_lines!()
-        .next()
-        .context("No data found!")?
-        .split(',')
-        .map(|i| i.parse::<usize>().map_err(anyhow::Error::new))
-        .collect::<Result<Vec<usize>>>()?
-        .iter()
-        .for_each(|&age| fish[age] += 1);
+    for age in get_my_values!()? {
+        fish[age.parse::<usize>()?] += 1;
+    }
     Ok(fish)
 }
 

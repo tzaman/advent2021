@@ -1,6 +1,7 @@
+use anyhow::{Context, Result};
 use std::error::Error;
 use std::fmt;
-use std::fs::File;
+use std::fs::{read_to_string, File};
 use std::io::{BufRead, BufReader};
 
 pub fn iter_lines(filename: &str) -> impl Iterator<Item = String> {
@@ -9,10 +10,25 @@ pub fn iter_lines(filename: &str) -> impl Iterator<Item = String> {
     reader.lines().map(|line| line.unwrap())
 }
 
+pub fn iter_csv_line(filename: &str) -> Result<Vec<String>> {
+    Ok(read_to_string(&filename)
+        .with_context(|| format!("Couldn't read input from {}", filename))?
+        .split(',')
+        .map(String::from)
+        .collect())
+}
+
 #[macro_export]
 macro_rules! get_my_lines {
     () => {
         iter_lines(&file!().replace("bin", "input").replace(".rs", ".txt"))
+    };
+}
+
+#[macro_export]
+macro_rules! get_my_values {
+    () => {
+        iter_csv_line(&file!().replace("bin", "input").replace(".rs", ".txt"))
     };
 }
 
