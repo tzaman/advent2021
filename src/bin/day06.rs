@@ -2,7 +2,7 @@ use advent::{get_my_lines, iter_lines};
 use anyhow::{Context, Result};
 
 const MAX_AGE: usize = 9;
-const RESET_AGE: usize = 6;
+const RESET_AGE: usize = 7;
 
 fn parse_input() -> Result<[usize; MAX_AGE]> {
     let mut fish: [usize; MAX_AGE] = [0; MAX_AGE];
@@ -18,11 +18,8 @@ fn parse_input() -> Result<[usize; MAX_AGE]> {
 }
 
 fn grow_fish(fish: &mut [usize; MAX_AGE]) {
-    let ready = fish[0];
-    fish[0] = 0;
+    fish[RESET_AGE] += fish[0];
     fish.rotate_left(1);
-    fish[MAX_AGE - 1] += ready;
-    fish[RESET_AGE] += ready;
 }
 
 fn solve(days: usize) -> Result<usize> {
