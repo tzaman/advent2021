@@ -1,5 +1,5 @@
 use advent::{get_my_lines, iter_lines};
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use pest::error::InputLocation::Pos;
 use pest::Parser;
 use pest_derive::Parser;
@@ -18,20 +18,25 @@ fn score(c: char) -> Result<u32> {
     })
 }
 
+fn get_location(e: pest::error::Error<Rule>) -> Option<usize> {
+    match e.location {
+        Pos(n) => Some(n),
+        _ => None,
+    }
+}
+
 fn main() -> Result<()> {
-    let mut acc: u32 = 0;
+    let mut error_score: u32 = 0;
     for line in get_my_lines!() {
         let result = NavigationParser::parse(Rule::line, &line);
-        if let Err(e) = result {
-            if let Pos(n) = e.location {
-                // If the error position is the last character,
-                // it's an incomplete pattern rather than corrupt
-                if n < line.len() {
-                    acc += score(line.as_bytes()[n] as char)?;
-                }
-            }
+        let n = result
+            .err()
+            .and_then(get_location)
+            .context("Wrong error type?")?;
+        if n < line.len() {
+            error_score += score(line.as_bytes()[n] as char)?;
         }
     }
-    println!("Error score: {}", acc);
+    println!("Error score: {}", error_score);
     Ok(())
 }
