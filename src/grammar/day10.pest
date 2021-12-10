@@ -1,0 +1,10 @@
+
+paren = { "()" | "(" ~ chunk+ ~ ")" }
+brace = { "{}" | "{" ~ chunk+ ~ "}" }
+bracket = { "[]" | "[" ~ chunk+ ~ "]" }
+angle = { "<>" | "<" ~ chunk+ ~ ">" }
+chunk = _{ (paren | brace | bracket | angle )}
+
+line = { (chunk)+ ~ (NEWLINE | EOI) }
+
+file = { SOI ~ (line)+ ~ EOI }
