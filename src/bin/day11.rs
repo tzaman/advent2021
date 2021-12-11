@@ -1,5 +1,6 @@
 use advent::{get_my_lines, iter_lines};
 use anyhow::{Context, Result};
+use itertools::Itertools;
 use std::num::ParseIntError;
 
 const SIZE: usize = 10;
@@ -12,15 +13,7 @@ struct OctoGrid {
 
 impl std::fmt::Display for OctoGrid {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let disp = (0..SIZE)
-            .map(|i| {
-                self.board[i]
-                    .iter()
-                    .map(|i| i.to_string() + " ")
-                    .collect::<String>()
-                    + "\n"
-            })
-            .collect::<String>();
+        let disp = self.board.iter().map(|row| row.iter().join(" ")).join("\n");
         write!(f, "{}", disp)
     }
 }
@@ -72,7 +65,7 @@ impl OctoGrid {
 
     fn step(&mut self) -> usize {
         self.increment();
-        while self.flash() {}
+        while self.flash() {} // no-op
         self.flashed
             .iter()
             .flat_map(|row| row.iter())
@@ -94,17 +87,14 @@ fn neighbors(pos: (usize, usize)) -> Vec<(usize, usize)> {
     let y_min = pos.1.saturating_sub(1);
     let y_max = std::cmp::min(pos.1 + 2, SIZE);
     (x_min..x_max)
-        .flat_map(|x| (y_min..y_max).map(move |y| (x, y)))
+        .cartesian_product(y_min..y_max)
         .filter(|&p| p != pos)
         .collect()
 }
 
 fn solve_p1() -> Result<usize> {
     let mut grid = OctoGrid::new(&mut get_my_lines!())?;
-    let mut flashes = 0;
-    for _ in 0..100 {
-        flashes += grid.step();
-    }
+    let flashes = (0..100).map(|_| grid.step()).sum();
     println!("{}", &grid);
     Ok(flashes)
 }
