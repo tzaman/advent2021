@@ -8,7 +8,6 @@ const SIZE: usize = 10;
 #[derive(Debug, Default)]
 struct OctoGrid {
     board: [[u8; SIZE]; SIZE],
-    flashed: [[bool; SIZE]; SIZE],
 }
 
 impl std::fmt::Display for OctoGrid {
@@ -22,16 +21,17 @@ impl OctoGrid {
     fn new(it: &mut impl Iterator<Item = String>) -> Result<Self> {
         let mut grid = Self::default();
         for i in 0..SIZE {
-            let line = it
+            let numbers: Vec<u8> = it
                 .next()
-                .with_context(|| format!("Expected line {} of board!", i + 1))?;
-            let nums = line
+                .with_context(|| format!("Expected line {} of board!", i + 1))?
                 .chars()
                 .map(|c| c.to_string().parse::<u8>())
                 .collect::<Result<Vec<u8>, ParseIntError>>()
-                .with_context(|| format!("Failed to parse board at line: '{}'!", line))?;
-            let nums: Vec<u8> = nums.into_iter().map(|digit| digit as u8).collect();
-            grid.board[i][..].clone_from_slice(&nums[..]);
+                .with_context(|| format!("Failed to parse line {} of board !", i + 1))?
+                .into_iter()
+                .map(|digit| digit as u8)
+                .collect();
+            grid.board[i][..].clone_from_slice(&numbers[..]);
         }
         Ok(grid)
     }
@@ -40,44 +40,43 @@ impl OctoGrid {
         for i in 0..SIZE {
             for j in 0..SIZE {
                 self.board[i][j] += 1;
-                self.flashed[i][j] = false;
             }
         }
     }
 
     fn flash(&mut self) -> bool {
-        let mut new_flash = false;
+        let mut flashed = false;
         for i in 0..SIZE {
             for j in 0..SIZE {
-                if self.board[i][j] > 9 && !self.flashed[i][j] {
-                    new_flash = true;
-                    self.flashed[i][j] = true;
+                if self.board[i][j] > 9 {
+                    flashed = true;
                     self.board[i][j] = 0;
-                    neighbors((i, j))
-                        .into_iter()
-                        .filter(|(x, y)| !self.flashed[*x][*y])
-                        .for_each(|(x, y)| self.board[x][y] += 1)
+                    for (x, y) in neighbors((i, j)) {
+                        if self.board[x][y] != 0 {
+                            self.board[x][y] += 1;
+                        }
+                    }
                 }
             }
         }
-        new_flash
+        flashed
     }
 
     fn step(&mut self) -> usize {
         self.increment();
         while self.flash() {} // no-op
-        self.flashed
+        self.board
             .iter()
             .flat_map(|row| row.iter())
-            .filter(|&&item| item)
+            .filter(|&&item| item == 0)
             .count()
     }
 
     fn all_flashed(&self) -> bool {
-        self.flashed
+        self.board
             .iter()
             .flat_map(|row| row.iter())
-            .all(|&item| item)
+            .all(|&item| item == 0)
     }
 }
 
