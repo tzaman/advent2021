@@ -31,11 +31,11 @@ impl Graph {
         self.traverse("start", &mut Vec::new(), have_time)
     }
 
-    fn traverse(&self, node: &str, path: &mut Vec<String>, have_time: bool) -> usize {
+    fn traverse<'a>(&'a self, node: &'a str, path: &mut Vec<&'a str>, have_time: bool) -> usize {
         if node == "end" {
             return 1;
         }
-        path.push(node.to_string());
+        path.push(node);
         let mut total = 0;
         for entry in self[node].iter() {
             let self_visits = path.iter().filter(|&e| e == entry).count();
