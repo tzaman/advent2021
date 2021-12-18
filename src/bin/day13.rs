@@ -54,8 +54,8 @@ fn render(points: &HashSet<Point>) -> Result<()> {
         .copied()
         .reduce(|acc, p| (max(acc.0, p.0), max(acc.1, p.1)))
         .context("No points!")?;
-    for y in 0..max_y + 1 {
-        for x in 0..max_x + 2 {
+    for y in 0..=max_y {
+        for x in 0..=max_x {
             print!("{}", if points.contains(&(x, y)) { "#" } else { " " });
         }
         println!();
