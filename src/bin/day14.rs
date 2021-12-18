@@ -29,33 +29,49 @@ fn parse_input() -> Result<(String, Rules)> {
     Ok((template, rules))
 }
 
-fn pair_insertion(polymer: &str, rules: &Rules) -> Result<String> {
-    let mut expand = String::new();
-    for pair in polymer.chars().collect_vec().windows(2) {
-        expand.push(pair[0]);
-        expand.push(rules[&(pair[0], pair[1])]);
+fn pair_insertion(pairs: &Counter<(char, char)>, rules: &Rules) -> Result<Counter<(char, char)>> {
+    let mut new_counts = Counter::new();
+    for (pair, freq) in pairs.iter() {
+        let insert = rules
+            .get(pair)
+            .with_context(|| format!("No rule found for {:?}", pair))?;
+        new_counts[&(pair.0, *insert)] += freq;
+        new_counts[&(*insert, pair.1)] += freq;
     }
-    expand.push(polymer.chars().last().context("Empty polymer!")?);
-    Ok(expand)
+    Ok(new_counts)
 }
 
-fn freq_diff(s: &str) -> Result<usize> {
-    let counts = s.chars().collect::<Counter<_>>().most_common_ordered();
-    let most = counts[0].1;
-    let least = counts.last().context("Empty frequency vector!")?.1;
+fn freq_diff(pairs: &Counter<(char, char)>) -> Result<usize> {
+    let mut letter_freqs = Counter::<char>::new();
+    for (pair, freq) in pairs.iter() {
+        letter_freqs[&pair.0] += freq;
+        letter_freqs[&pair.1] += freq;
+    }
+    for (letter, freq) in letter_freqs.clone().iter() {
+        // Correct for double-counting interior letters
+        // by halving all frequencies and rounding up
+        letter_freqs[letter] = (freq % 2) + (freq / 2);
+    }
+    let counts = letter_freqs.most_common_ordered();
+    let most = counts.first().context("Empty frequency counter!")?.1;
+    let least = counts.last().context("Empty frequency counter!")?.1;
     Ok(most - least)
 }
 
-fn solve_p1(template: &str, rules: &Rules) -> Result<usize> {
-    let mut temp = template.to_string();
-    for _ in 0..10 {
-        temp = pair_insertion(&temp, rules)?;
+fn solve(template: &str, rules: &Rules, times: usize) -> Result<usize> {
+    let mut pair_freqs = template
+        .chars()
+        .tuple_windows::<(_, _)>()
+        .collect::<Counter<_>>();
+    for _ in 0..times {
+        pair_freqs = pair_insertion(&pair_freqs, rules)?;
     }
-    freq_diff(&temp)
+    freq_diff(&pair_freqs)
 }
 
 fn main() -> Result<()> {
     let (template, rules) = parse_input()?;
-    println!("Most - least common: {}", solve_p1(&template, &rules)?);
+    println!("After 10 steps: {}", solve(&template, &rules, 10)?);
+    println!("After 40 steps: {}", solve(&template, &rules, 40)?);
     Ok(())
 }
